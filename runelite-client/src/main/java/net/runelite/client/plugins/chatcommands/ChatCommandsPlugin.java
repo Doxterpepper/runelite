@@ -63,6 +63,7 @@ import net.runelite.client.chat.ChatCommandManager;
 import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.discord.DiscordService;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ChatInput;
 import net.runelite.client.game.ItemManager;
@@ -115,6 +116,7 @@ public class ChatCommandsPlugin extends Plugin
 	private static final String PB_COMMAND = "!pb";
 	private static final String GC_COMMAND_STRING = "!gc";
 	private static final String DUEL_ARENA_COMMAND = "!duels";
+	private static final String DISCORD_COMMAND = "!discord";
 
 	@VisibleForTesting
 	static final int ADV_LOG_EXPLOITS_TEXT_INDEX = 1;
@@ -159,6 +161,9 @@ public class ChatCommandsPlugin extends Plugin
 	@Inject
 	private HiscoreClient hiscoreClient;
 
+	@Inject
+	private DiscordService discordService;
+
 	@Override
 	public void startUp()
 	{
@@ -177,6 +182,7 @@ public class ChatCommandsPlugin extends Plugin
 		chatCommandManager.registerCommandAsync(PB_COMMAND, this::personalBestLookup, this::personalBestSubmit);
 		chatCommandManager.registerCommandAsync(GC_COMMAND_STRING, this::gambleCountLookup, this::gambleCountSubmit);
 		chatCommandManager.registerCommandAsync(DUEL_ARENA_COMMAND, this::duelArenaLookup, this::duelArenaSubmit);
+		chatCommandManager.registerCommandAsync(DISCORD_COMMAND, this::discordUserCommand);
 	}
 
 	@Override
@@ -1415,6 +1421,35 @@ public class ChatCommandsPlugin extends Plugin
 		else
 		{
 			return toEndPoint(AccountType.NORMAL);
+		}
+	}
+
+	/**
+	 * Resolves command "!discord username" to user's discord username with discriminator.
+	 * @param chatMessage chat message
+	 * @param message Message
+	 */
+	private void discordUserCommand(ChatMessage chatMessage, String message)
+	{
+		if (message.length() == DISCORD_COMMAND.length())
+		{
+			return;
+		}
+
+		String discordCommand = message.substring(DISCORD_COMMAND.length() + 1);
+		if (discordCommand.equals("username"))
+		{
+			ChatMessageBuilder chatMessageBuilder = new ChatMessageBuilder()
+					.append(discordService.getCurrentUser().username)
+					.append("#")
+					.append(discordService.getCurrentUser().discriminator);
+
+			final String response = chatMessageBuilder.build();
+
+			MessageNode messageNode = chatMessage.getMessageNode();
+			messageNode.setRuneLiteFormatMessage(response);
+			chatMessageManager.update(messageNode);
+			client.refreshChat();
 		}
 	}
 

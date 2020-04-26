@@ -125,7 +125,7 @@ public class CommandManager
 		int stringStackCount = client.getStringStackSize();
 		int intStackCount = client.getIntStackSize();
 
-		final String typedText = stringStack[stringStackCount - 1];
+		final String typedText = resolveDiscordCommand(stringStack[stringStackCount - 1]);
 		final int chatType = intStack[intStackCount - 1];
 
 		ChatboxInput chatboxInput = new ChatboxInput(typedText, chatType)
@@ -208,6 +208,15 @@ public class CommandManager
 		{
 			sending = false;
 		}
+	}
+
+	private String resolveDiscordCommand(String message)
+	{
+		if (message.contains("!discord username"))
+		{
+			return message.replaceFirst("!discord username", "dickhead mcgee.");
+		}
+		return message;
 	}
 
 	private void sendPrivmsg(String target, String message)

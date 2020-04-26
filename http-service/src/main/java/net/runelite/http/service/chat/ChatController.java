@@ -235,4 +235,23 @@ public class ChatController
 
 		return layout;
 	}
+
+	@PostMapping("/discord-name")
+	public void submitDiscordUsername(@RequestParam String name, @RequestParam String discordUsername)
+	{
+		chatService.setDiscordUsername(name, discordUsername);
+	}
+
+	@GetMapping("/discord-name")
+	public String getDiscordUsername(@RequestParam String name)
+	{
+		String discordName = chatService.getDiscordUsername(name);
+
+		if (discordName == null)
+		{
+			throw new NotFoundException();
+		}
+
+		return discordName;
+	}
 }

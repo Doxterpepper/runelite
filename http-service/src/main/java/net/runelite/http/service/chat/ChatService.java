@@ -229,4 +229,20 @@ public class ChatService
 			jedis.setex("layout." + name, (int) EXPIRE.getSeconds(), Joiner.on(' ').join(rooms));
 		}
 	}
+
+	public void setDiscordUsername(String name, String discordName)
+	{
+		try (Jedis jedis = jedisPool.getResource())
+		{
+			jedis.setex("discord." + name, (int) EXPIRE.getSeconds(), discordName);
+		}
+	}
+
+	public String getDiscordUsername(String name)
+	{
+		try (Jedis jedis = jedisPool.getResource())
+		{
+			return jedis.get(name);
+		}
+	}
 }
